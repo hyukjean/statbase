@@ -1,16 +1,8 @@
 "use client";
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-} from 'recharts';
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { useTheme } from '@mui/material/styles';
 
 interface LineDefinition {
   /**
@@ -51,8 +43,17 @@ interface ChartViewProps {
  * data objects and definitions of which keys to plot.
  */
 export default function ChartView({ data, lines, xKey, title, yAxisLabel }: ChartViewProps) {
+  const theme = useTheme();
+  interface ExtendedPalette { series?: { equityPrimary?: string; equityAlt?: string; crypto?: string; indexComposite?: string } }
+  const ep = theme.palette as unknown as ExtendedPalette;
+  const colorMap: Record<string, string> = {
+    SPY: ep.series?.equityPrimary || theme.palette.primary.main,
+    QQQ: ep.series?.equityAlt || theme.palette.secondary.main,
+    BTC: ep.series?.crypto || '#F7931A',
+    Composite: ep.series?.indexComposite || theme.palette.info.main,
+  };
   return (
-    <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2, minHeight: 300 }}>
+    <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2, minHeight: 300 }} role="region" aria-label={title || '차트'}>
       {title && (
         <Typography variant="subtitle1" gutterBottom>
           {title}
@@ -68,15 +69,21 @@ export default function ChartView({ data, lines, xKey, title, yAxisLabel }: Char
           />
           <Tooltip />
           <Legend />
-          {lines.map((line) => (
-            <Line
-              key={line.key}
-              type="monotone"
-              dataKey={line.key}
-              name={line.name ?? line.key}
-              dot={false}
-            />
-          ))}
+          {lines.map((line) => {
+            const stroke = colorMap[line.key] || theme.palette.primary.main;
+            return (
+              <Line
+                key={line.key}
+                type="monotone"
+                dataKey={line.key}
+                name={line.name ?? line.key}
+                stroke={stroke}
+                strokeWidth={2}
+                dot={false}
+                isAnimationActive={false}
+              />
+            );
+          })}
         </LineChart>
       </ResponsiveContainer>
     </Box>

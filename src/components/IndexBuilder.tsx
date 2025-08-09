@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import { sanitizeTicker } from '../lib/format';
 import {
   Box,
   Typography,
@@ -25,7 +26,10 @@ export default function IndexBuilder() {
   const [assets, setAssets] = React.useState<Asset[]>([]);
   const handleAdd = () => {
     if (!query.trim()) return;
-    setAssets([...assets, { name: query.trim(), weight: 1 }]);
+    const sanitized = sanitizeTicker(query);
+    if (!sanitized) return;
+    if (assets.some(a => a.name === sanitized)) return;
+    setAssets([...assets, { name: sanitized, weight: 1 }]);
     setQuery('');
   };
   const handleRemove = (name: string) => {
@@ -75,7 +79,7 @@ export default function IndexBuilder() {
           </ListItem>
         ))}
       </List>
-      <Button variant="contained" sx={{ mt: 2 }}>
+  <Button variant="contained" sx={{ mt: 2 }} disabled={!assets.length}>
         인덱스 생성
       </Button>
     </Box>
