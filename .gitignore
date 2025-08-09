@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+.env*
+*.log
+coverage
+dist
+*.DS_Store
+*.swp
+public/data
